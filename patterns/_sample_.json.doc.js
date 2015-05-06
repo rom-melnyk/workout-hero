@@ -46,3 +46,9 @@ function Period (opts) {
  	this.offset = parseTime(opts.offset);
  	this.duration = opts.duration || 10;
 }
+
+/* ----------------------- Timeline parsed ----------------------- */
+function TlBeat () {
+	this.x = null;
+}
+
