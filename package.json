@@ -1,0 +1,27 @@
+{
+  "name": "workout-hero",
+  "description": "Workout + Guitar Hero + pattern designer",
+  "homepage": "http://localhost/todo",
+  "keywords": [
+    "workout",
+    "hero",
+    "guitar",
+    "metronome"
+  ],
+  "author": "Roman Melnyk <email.rom.melnyk@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/rom-melnyk/TODO.git"
+  },
+  "main": "index.html",
+  "version": "0.0.1",
+  "devDependencies": {
+    "browserify": "^10.1.0",
+    "watchify": "^3.2.1"
+  },
+  "scripts": {
+    "start": "watchify src/script.js -d -v -o dest/bundle.js"
+  },
+  "license": "MIT",
+  "private": true
+}
