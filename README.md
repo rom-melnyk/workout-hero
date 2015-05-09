@@ -1,4 +1,4 @@
-# WebGL experiments
+# The Workout hero
 
 ## Installation
 This requires any simple web server: Apache, IIS, etc.  

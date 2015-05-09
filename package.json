@@ -11,7 +11,7 @@
   "author": "Roman Melnyk <email.rom.melnyk@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git://github.com/rom-melnyk/TODO.git"
+    "url": "git://github.com/rom-melnyk/workout-hero.git"
   },
   "main": "index.html",
   "version": "0.0.1",
