@@ -11,7 +11,7 @@ module.exports = function (WH) {
 		this.timeline = [];
 
 		this.currentTickIndex = 0;
-		this.currentTick = null;
+		this.currentTick = this.timeline[0];
 		this.timing = {
 			/**
 			 * @cfg {Date} startedAt

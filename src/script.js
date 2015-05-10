@@ -15,14 +15,11 @@ window.start = function () {
 	});
 
 	var tempo = new WH.Timeline('tempo');
-	tempo.push(new WH.Tick(300, 'tempo'));
-	tempo.push(new WH.Tick(300, 'tempo'));
-	tempo.push(new WH.Tick(300, 'tempo'));
-	tempo.push(new WH.Tick(300, ''));
-	tempo.push(new WH.Tick(600, 'tempo'));
-	tempo.push(new WH.Tick(600, 'tempo'));
-	tempo.push(new WH.Tick(600, 'tempo'));
-	tempo.push(new WH.Tick(600, 'tempo'));
+	var tempoString = 'p300'
+		+ '3t300 2t1000 3t300 2t1000 3t300 2t1000 3t300 2t1000';
+
+	tempo.fromString(tempoString);
+	console.log('Duration: ' + tempo.duration / 1000 + 's');
 
 	WH.Timer.timelines.push(tempo);
 	WH.Timer.start();
