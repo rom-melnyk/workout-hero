@@ -1,31 +1,29 @@
-require('./gl/gl');
+require('./base/workout-hero');
 
 window.start = function () {
 	function rnd (n) {
 		return Math.floor(Math.random() * n);
 	}
 
-	Number.prototype.times = function (cb) {
-		for (var i = 0; i < this; i++) cb(i);
-	};
-
-	GL.init();
-	GL.setProgram(GL.defaultProgram, [
-		'a_posCoords',
-		'a_texCoords',
-		'a_color',
-		'u_texUnit',
-		'u_useTexture',
-		'u_shift',
-		'u_resolution'
-	]);
-	GL.useFramebuffer(null);
-
-	var fig = GL.createFigure('fig01');
-	fig.setFill({color: rnd(0xFFFFFF), alpha: Math.random()});
-	(50).times(function () {
-		fig.addRectangleWH([rnd(500), rnd(200), rnd(500), rnd(100)]);
+	WH.Handler.register('tempo', function () {
+		var d = new Date();
+		console.log('tick @' + d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
+		$('.current-tick').addClass('highlight');
+		setTimeout(function () {
+			$('.current-tick').removeClass('highlight');
+		}, 50);
 	});
 
-	fig.draw();
+	var tempo = new WH.Timeline('tempo');
+	tempo.push(new WH.Tick(300, 'tempo'));
+	tempo.push(new WH.Tick(300, 'tempo'));
+	tempo.push(new WH.Tick(300, 'tempo'));
+	tempo.push(new WH.Tick(300, ''));
+	tempo.push(new WH.Tick(600, 'tempo'));
+	tempo.push(new WH.Tick(600, 'tempo'));
+	tempo.push(new WH.Tick(600, 'tempo'));
+	tempo.push(new WH.Tick(600, 'tempo'));
+
+	WH.Timer.timelines.push(tempo);
+	WH.Timer.start();
 };

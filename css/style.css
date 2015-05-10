@@ -1,0 +1,40 @@
+html, body {
+	padding: 0;
+	margin: 0;
+	height: 100%;
+	width: 100%;
+	min-width: 800px;
+	min-height: 400px;
+	overflow: hidden;
+	background-color: #efefef;
+	font: 18px sans-serif;
+}
+
+.header, .media-content, .footer {
+	position: absolute;
+	width: 100%;
+}
+
+.footer {
+	bottom: 0;
+	height: 2em;
+}
+
+.current-tick {
+	width: 1em;
+	height: 1em;
+	margin-left: 25%;
+	position: relative;
+	top: .5em;
+	left: .5em;
+	border-radius: 50%;
+	background-color: #d1d1d8;
+	transition: width .1s, height .1s, top .1s, left .1s, background-color .1s;
+}
+.current-tick.highlight {
+	width: 2em;
+	height: 2em;
+	top: 0;
+	left: 0;
+	background-color: #ffffff;
+}
