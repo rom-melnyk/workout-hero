@@ -12,15 +12,35 @@ module.exports = function (WH) {
 		rep = +rep || 1;
 		dur = +dur;
 
-		console.log('> found: ' + rep + '/' + cmd + '/' + dur);
+		//console.log('> found: ' + rep + '/' + cmd + '/' + dur);
 		(rep).times(function () {
+			if (cmd === 'p') {
+				if (timeline.timeline.length > 0) {
+					timeline.timeline[timeline.timeline.length - 1].interval += dur;
+					return true;
+				}
+			}
 			timeline.push(
-				new WH.Tick(dur, cmd === 'p' ? '' : 'tempo')
+				new WH.Tick(dur, cmd === 'p' ? '' : 'beat')
 			);
 		});
 	}
 
-	WH.Timeline.prototype.fromString = function (str) {
+	/**
+	 * Parses string of following format: "/<formula><separator>{0,}/{1,}"
+	 * 		where:
+	 * 		<formula> is <repetitions><command><interval>
+	 * 		 		where:
+	 * 				<repetitions> is number
+	 * 				<command> is /[ptx]/
+	 * 					"p" for pause,
+	 * 					"t" or "x" for regular beat tick
+	 * 				<interval> is number and means ms before the next bet tick starts
+	 * 		<separator> is anything that does not match the <formula>
+	 *
+	 * @param {String} str
+	 */
+	WH.Timeline.prototype.fromBeatString = function (str) {
 		var repetitions, command, duration, expectation;
 
 		function _startNewFragment () {
