@@ -2,6 +2,8 @@
  * A module for Browserify/Watchify.
  * Must be included after `WH.Timeline`.
  */
+var CFG = require('../base/config');
+
 module.exports = function (WH) {
 	WH.Timeline.clean = function () {
 		this.timeline = 0;
@@ -21,7 +23,7 @@ module.exports = function (WH) {
 				}
 			}
 			timeline.push(
-				new WH.Tick(dur, cmd === 'p' ? '' : 'beat')
+				new WH.Tick(dur, cmd === 'p' ? '' : CFG.SYSTEM.beatCommonName)
 			);
 		});
 	}

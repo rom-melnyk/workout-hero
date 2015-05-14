@@ -1,12 +1,15 @@
+var CFG = require('../base/config');
+
 module.exports = function (WH) {
-	var intervalId;
+	var intervalId,
+		beatTimeline;
 
 	WH.Timer = {
 		/**
 		 * @cfg {WH.Timeline[]}
 		 */
 		timelines: [],
-		interval: 40
+		interval: CFG.SYSTEM.timerInterval
 	};
 
 	/**
@@ -24,8 +27,18 @@ module.exports = function (WH) {
 		return runningTimelinesCount;
 	}
 
+	function _uiReminder () {
+		if (CFG.UI.footer.showReminder === 1) {
+			$('.reminder').width(
+				Math.round(beatTimeline.timing.absoluteOffset / beatTimeline.duration * 10000) / 100
+				+ '%'
+			);
+		}
+	}
+
 	function __tick__ () {
 		if (traverseAllTimelines()) {
+			_uiReminder();
 			intervalId = setTimeout(__tick__, WH.Timer.interval);
 		} else {
 			console.log('[i] Timer stopped');
@@ -35,6 +48,7 @@ module.exports = function (WH) {
 	WH.Timer.start = function () {
 		var now = Date.now();
 
+		beatTimeline = WH.Timeline.get(CFG.SYSTEM.beatCommonName);
 		console.log('[i] Timer started');
 		this.timelines.forEach(function (timeline) {
 			timeline.start(now);

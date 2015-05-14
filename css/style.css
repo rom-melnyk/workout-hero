@@ -38,3 +38,12 @@ html, body {
 	left: -1em;
 	background-color: #ffffff;
 }
+
+.reminder {
+	position: absolute;
+	bottom: 0;
+	height: 2px;
+	left: 0;
+	/* width will be set dynamically */
+	background-color: #89e;
+}

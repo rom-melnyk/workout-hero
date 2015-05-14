@@ -1,4 +1,6 @@
 module.exports = function (WH) {
+	var timelines = {};
+
 	/**
 	 * @constructor Timeline
 	 * @param {String} name
@@ -28,6 +30,8 @@ module.exports = function (WH) {
 		this.isRunning = false;
 		this.isActive = true;
 		this.duration = 0;
+
+		timelines[name] = this;
 	};
 
 	/**
@@ -102,5 +106,14 @@ module.exports = function (WH) {
 
 			__proceedWithCurrentTick(this);
 		}
-	}
+	};
+
+	/**
+	 * @static
+	 * @param {String} name
+	 * @return {WH.Timeline}
+	 */
+	WH.Timeline.get = function (name) {
+		return timelines[name];
+	};
 };
