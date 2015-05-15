@@ -1,6 +1,14 @@
 module.exports = function (WH) {
 	var timelines = {};
 
+	function __validateTick (tick, timeline) {
+		if (!tick) {
+			console.warn('[!] Timeline "' + timeline.name + '": wrong tick @' + timeline.currentTick + '; stopped');
+			timeline.reset();
+		}
+		return !!tick;
+	}
+
 	/**
 	 * @constructor Timeline
 	 * @param {String} name
@@ -8,106 +16,87 @@ module.exports = function (WH) {
 	WH.Timeline = function (name) {
 		this.name = name;
 		/**
-		 * @cfg {Tick[]} timeline				each value means the time offset before next tick
+		 * @cfg {Tick[]} ticks				each value means the time offset before next tick
 		 */
-		this.timeline = [];
+		this.ticks = [];
+		this.currentTick = 0;
 
-		this.currentTickIndex = 0;
-		this.currentTick = this.timeline[0];
-		this.timing = {
-			/**
-			 * @cfg {Date} startedAt
-			 */
-			startedAt: 0,
-			/**
-			 * @cfg {Date} stoppedAt
-			 */
-			stoppedAt: 0,
-			currentTickOffset: 0,
-			absoluteOffset: 0
-		};
+		this.elapsed =  0;
+
+		this.startedAt = 0;
+		this.stoppedAt = 0;
 
 		this.isRunning = false;
 		this.isActive = true;
-		this.duration = 0;
 
 		timelines[name] = this;
 	};
+
+	WH.Timeline.prototype.getCurrentTick = function () {
+		return this.ticks[this.currentTick];
+	};
+
+	WH.Timeline.prototype.getNextTick = function () {
+		return this.ticks[this.currentTick + 1];
+	};
+
+	WH.Timeline.prototype.getDuration = function () {
+		return (this.ticks[this.ticks.length - 1] || {offset: 0}).offset;
+	};
+
+
+// ----- player methods -----
+	WH.Timeline.prototype.start = function (time) {
+		this.isRunning = true;
+		this.startedAt = time || Date.now();
+	};
+
+	WH.Timeline.prototype.pause = function (time) {
+		this.isRunning = false;
+		this.stoppedAt = time || Date.now();
+	};
+
+	WH.Timeline.prototype.reset = function () {
+		this.currentTick = 0;
+		this.startedAt = 0;
+		this.stoppedAt = 0;
+		this.elapsed = 0;
+		this.isRunning = false;
+	};
+// ----- end of player methods -----
+
 
 	/**
 	 * @param {Tick|WH.Tick} tick
 	 */
 	WH.Timeline.prototype.push = function (tick) {
-		tick = tick instanceof WH.Tick ? tick : new WH.Tick(0, '');
-		this.timeline.push(tick);
-		this.duration += tick.interval;
-		if (this.timeline.length === 1) this.currentTick = this.timeline[0];
+		if (!(tick instanceof WH.Tick)) return;
+		this.ticks.push(tick);
 	};
 
-	WH.Timeline.prototype.moveToNextTick = function () {
-		if (!this.isRunning) return;
+	WH.Timeline.prototype.timerEvent = function (elapsed) {
+		var tick = this.getCurrentTick(),
+			nextTick;
 
-		this.timing.currentTickOffset += (this.currentTick || {interval: 0}).interval;
-		this.currentTickIndex++;
-		this.currentTick = this.timeline[this.currentTickIndex];
-	};
-
-	function __isCurrentTickOk (timeline) {
-		if (!(timeline.currentTick instanceof WH.Tick)) {
-			timeline.reset();
-			return false;
-		} else {
-			return true;
+		if (!this.isRunning || !tick) {
+			this.reset();
+			return;
 		}
-	}
 
-	function __proceedWithCurrentTick (timeline) {
-		if (__isCurrentTickOk(timeline)) {
-			WH.Handler.run(timeline.currentTick.handler, timeline);
-		}
-	}
-
-	/**
-	 * @param {Number} [time=Date.now()]
-	 */
-	WH.Timeline.prototype.start = function (time) {
-		if (this.isRunning) return;
-
-		this.isRunning = true;
-		this.timing.startedAt = time || Date.now();
-
-		__proceedWithCurrentTick(this);
-	};
-
-	/**
-	 * @param {Number} [time=Date.now()]
-	 */
-	WH.Timeline.prototype.pause = function (time) {
-		this.isRunning = false;
-		this.timing.stoppedAt = time || Date.now();
-	};
-
-	WH.Timeline.prototype.reset = function () {
-		this.currentTickIndex = 0;
-		this.currentTick = this.timeline[0];
-		this.timing.startedAt = 0;
-		this.timing.stoppedAt = 0;
-		this.timing.currentTickOffset = 0;
-		this.timing.absoluteOffset = 0;
-		this.isRunning = false;
-	};
-
-	WH.Timeline.prototype.timerEvent = function (interval) {
-		if (!__isCurrentTickOk(this)) return;
-
-		this.timing.absoluteOffset += interval;
-		if (this.timing.absoluteOffset > this.timing.currentTickOffset + this.currentTick.interval) {
-			this.moveToNextTick();
-
-			__proceedWithCurrentTick(this);
+		this.elapsed = elapsed;
+		if (this.elapsed >= tick.offset) {
+			this.currentTick++;
+			nextTick = this.getCurrentTick();
+			while (nextTick && this.elapsed >= nextTick.offset) {
+				tick = this.getCurrentTick();
+				this.currentTick++;
+				nextTick = this.getCurrentTick();
+			}
+			WH.Handler.run(tick.handler, this);
 		}
 	};
 
+	// ------------------------------------------------ statics ------------------------------------------------
 	/**
 	 * @static
 	 * @param {String} name
@@ -116,4 +105,10 @@ module.exports = function (WH) {
 	WH.Timeline.get = function (name) {
 		return timelines[name];
 	};
+
+	WH.Timeline.clean = function () {
+		this.ticks = [];
+		this.reset();
+	};
+
 };

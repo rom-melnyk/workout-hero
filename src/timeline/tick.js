@@ -1,11 +1,11 @@
 module.exports = function (WH) {
 	/**
 	 * @constructor Tick
-	 * @param {Number} interval					how many ms wait till next tick
+	 * @param {Number} offset					offset from the beginning of the timeline, ms
 	 * @param {String} handler					what to do
 	 */
-	WH.Tick = function (interval, handler) {
-		this.interval = interval;
+	WH.Tick = function (offset, handler) {
+		this.offset = offset;
 		this.handler = handler;
 	}
 };

@@ -5,25 +5,22 @@
 var CFG = require('../base/config');
 
 module.exports = function (WH) {
-	WH.Timeline.clean = function () {
-		this.timeline = 0;
-		this.reset();
-	};
-
-	function _proceedWithSequence (timeline, rep, cmd, dur) {
+	function _proceedWithSequence (timeline, rep, cmd, offset) {
+		var duration;
 		rep = +rep || 1;
-		dur = +dur;
+		offset = +offset;
 
-		//console.log('> found: ' + rep + '/' + cmd + '/' + dur);
+		//console.log('> found: ' + rep + '/' + cmd + '/' + offset);
 		(rep).times(function () {
-			if (cmd === 'p') {
-				if (timeline.timeline.length > 0) {
-					timeline.timeline[timeline.timeline.length - 1].interval += dur;
-					return true;
-				}
-			}
+			//if (cmd === 'p') {
+			//	if (timeline.ticks.length > 0) {
+			//		timeline.ticks[timeline.ticks.length - 1].offset += offset;
+			//		return true;
+			//	}
+			//}
+			duration = timeline.getDuration();
 			timeline.push(
-				new WH.Tick(dur, cmd === 'p' ? '' : CFG.SYSTEM.beatCommonName)
+				new WH.Tick(duration + offset, cmd === 'p' ? '' : CFG.SYSTEM.beatCommonName)
 			);
 		});
 	}
@@ -31,24 +28,24 @@ module.exports = function (WH) {
 	/**
 	 * Parses string of following format: "/<formula><separator>{0,}/{1,}"
 	 * 		where:
-	 * 		<formula> is <repetitions><command><interval>
+	 * 		<formula> is <repetitions><command><offset>
 	 * 		 		where:
 	 * 				<repetitions> is number
 	 * 				<command> is /[ptx]/
 	 * 					"p" for pause,
 	 * 					"t" or "x" for regular beat tick
-	 * 				<interval> is number and means ms before the next bet tick starts
+	 * 				<offset> is number and means ms after the previous beat
 	 * 		<separator> is anything that does not match the <formula>
 	 *
 	 * @param {String} str
 	 */
 	WH.Timeline.prototype.fromBeatString = function (str) {
-		var repetitions, command, duration, expectation;
+		var repetitions, command, offset, expectation;
 
 		function _startNewFragment () {
 			repetitions = '';
 			command = '';
-			duration = '';
+			offset = '';
 			expectation = /[ptx]|\d/;
 		}
 
@@ -59,8 +56,8 @@ module.exports = function (WH) {
 				if (/[ptx]/.test(str[i])) {
 
 					// Scenario: found a command right after another one without any separator
-					if (duration) {
-						_proceedWithSequence(this, repetitions, command, duration);
+					if (offset) {
+						_proceedWithSequence(this, repetitions, command, offset);
 						_startNewFragment();
 					}
 
@@ -68,20 +65,20 @@ module.exports = function (WH) {
 					expectation = /\d/;
 				} else if (/\d/.test(str[i])) {
 					if (command) {
-						duration += str[i];
+						offset += str[i];
 					} else {
 						repetitions += str[i];
 					}
 					expectation = /[ptx]|\d/;
 				}
 			} else {
-				if (command && duration) {
-					_proceedWithSequence(this, repetitions, command, duration);
+				if (command && offset) {
+					_proceedWithSequence(this, repetitions, command, offset);
 				} // else - separator
 				_startNewFragment();
 			}
 		}
-		_proceedWithSequence(this, repetitions, command, duration);
+		_proceedWithSequence(this, repetitions, command, offset);
 
 	}
 };

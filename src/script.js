@@ -6,11 +6,11 @@ window.start = function () {
 	}
 
 	var beat = WH.Timeline.get('beat');
-	var beatString = 'p300 p300 p300 '
-		+ '3t300 2t1000 3t300 2t1000 3t300 2t1000 3t300 2t1000';
+	var beatString = 'p1000 '
+		+ '3t300 2t1000 p1000 | 3t300 2t1000 p1000 | 3t300 2t1000 p1000 | 3t300 2t1000 p1000';
 
 	beat.fromBeatString(beatString);
-	console.log('Duration: ' + beat.duration / 1000 + 's');
+	console.log('Duration: ' + beat.getDuration() / 1000 + 's');
 
 	WH.Timer.timelines.push(beat);
 	WH.Timer.start();

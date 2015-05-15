@@ -9,28 +9,30 @@ module.exports = function (WH) {
 		 * @cfg {WH.Timeline[]}
 		 */
 		timelines: [],
-		interval: CFG.SYSTEM.timerInterval
+		interval: CFG.SYSTEM.timerInterval,
+		startedAt: null
 	};
 
 	/**
 	 * @return {Number} how many timelines are running
 	 */
 	function traverseAllTimelines () {
-		var runningTimelinesCount = 0;
+		var runningTimelinesCount = 0,
+			now = Date.now();
 
 		WH.Timer.timelines.forEach(function (timeline) {
 			if (!timeline.isRunning || !timeline.isActive) return true;
 			runningTimelinesCount++;
-			timeline.timerEvent(WH.Timer.interval);
+			timeline.timerEvent(now - WH.Timer.startedAt);
 		});
 
 		return runningTimelinesCount;
 	}
 
-	function _uiReminder () {
+	function __uiReminder () {
 		if (CFG.UI.footer.showReminder === 1) {
 			$('.reminder').width(
-				Math.round(beatTimeline.timing.absoluteOffset / beatTimeline.duration * 10000) / 100
+				Math.round(beatTimeline.elapsed / beatTimeline.getDuration() * 10000) / 100
 				+ '%'
 			);
 		}
@@ -38,7 +40,7 @@ module.exports = function (WH) {
 
 	function __tick__ () {
 		if (traverseAllTimelines()) {
-			_uiReminder();
+			__uiReminder();
 			intervalId = setTimeout(__tick__, WH.Timer.interval);
 		} else {
 			console.log('[i] Timer stopped');
@@ -46,12 +48,12 @@ module.exports = function (WH) {
 	}
 
 	WH.Timer.start = function () {
-		var now = Date.now();
+		this.startedAt = Date.now();
 
 		beatTimeline = WH.Timeline.get(CFG.SYSTEM.beatCommonName);
 		console.log('[i] Timer started');
 		this.timelines.forEach(function (timeline) {
-			timeline.start(now);
+			timeline.start(this.startedAt);
 		});
 
 		__tick__();
