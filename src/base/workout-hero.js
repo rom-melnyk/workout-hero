@@ -4,7 +4,7 @@ var modUtils = require('../utils/utils'),
 	modTimeline = require('../timeline/timeline'),
 	modTimer = require('../timer/timer'),
 	modParser = require('../timeline/parser'),
-	modbeatHandler = require('../handler/beat-handler'),
+	modUI = require('../ui/ui'),
 	CFG = require('./config');
 
 var WH = window.WH = {};
@@ -14,10 +14,10 @@ modTick(WH);
 modTimeline(WH);
 modTimer(WH);
 modParser(WH);
-modbeatHandler(WH);
 
-// ---------------------------------- init ----------------------------------
-new WH.Timeline(CFG.SYSTEM.beatCommonName);
-// --------------------------------------------------------------------------
+WH.init = function () {
+	new WH.Timeline(CFG.SYSTEM.beatCommonName);
+	modUI.init();
+};
 
 module.exports = WH;

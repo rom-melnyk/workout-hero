@@ -14,7 +14,8 @@ module.exports = {
 			 * 		1: show the total reminder
 			 * 		2: show the round reminder
 			 */
-			showReminder: 1
+			showReminder: 1,
+			pixelsPerSecond: 200
 		}
 	},
 

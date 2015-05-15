@@ -1,8 +1,8 @@
-var CFG = require('../base/config');
+var CFG = require('../base/config'),
+	UI = require('../ui/ui');
 
 module.exports = function (WH) {
-	var intervalId,
-		beatTimeline;
+	var intervalId;
 
 	WH.Timer = {
 		/**
@@ -13,10 +13,7 @@ module.exports = function (WH) {
 		startedAt: null
 	};
 
-	/**
-	 * @return {Number} how many timelines are running
-	 */
-	function traverseAllTimelines () {
+	function __tick__ () {
 		var runningTimelinesCount = 0,
 			now = Date.now();
 
@@ -26,21 +23,8 @@ module.exports = function (WH) {
 			timeline.timerEvent(now - WH.Timer.startedAt);
 		});
 
-		return runningTimelinesCount;
-	}
-
-	function __uiReminder () {
-		if (CFG.UI.footer.showReminder === 1) {
-			$('.reminder').width(
-				Math.round(beatTimeline.elapsed / beatTimeline.getDuration() * 10000) / 100
-				+ '%'
-			);
-		}
-	}
-
-	function __tick__ () {
-		if (traverseAllTimelines()) {
-			__uiReminder();
+		if (runningTimelinesCount) {
+			UI.updateReminder();
 			intervalId = setTimeout(__tick__, WH.Timer.interval);
 		} else {
 			console.log('[i] Timer stopped');
@@ -50,11 +34,10 @@ module.exports = function (WH) {
 	WH.Timer.start = function () {
 		this.startedAt = Date.now();
 
-		beatTimeline = WH.Timeline.get(CFG.SYSTEM.beatCommonName);
 		console.log('[i] Timer started');
 		this.timelines.forEach(function (timeline) {
 			timeline.start(this.startedAt);
-		});
+		}, this);
 
 		__tick__();
 	};
@@ -68,6 +51,16 @@ module.exports = function (WH) {
 		console.log('[i] Timer paused');
 		this.timelines.forEach(function (timeline) {
 			timeline.pause(now);
+		});
+	};
+
+	WH.Timer.reset = function () {
+		clearTimeout(intervalId);
+		intervalId = null;
+
+		console.log('[i] Timer stopped');
+		this.timelines.forEach(function (timeline) {
+			timeline.reset();
 		});
 	};
 

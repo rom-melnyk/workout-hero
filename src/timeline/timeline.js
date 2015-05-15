@@ -1,14 +1,6 @@
 module.exports = function (WH) {
 	var timelines = {};
 
-	function __validateTick (tick, timeline) {
-		if (!tick) {
-			console.warn('[!] Timeline "' + timeline.name + '": wrong tick @' + timeline.currentTick + '; stopped');
-			timeline.reset();
-		}
-		return !!tick;
-	}
-
 	/**
 	 * @constructor Timeline
 	 * @param {String} name
@@ -34,10 +26,6 @@ module.exports = function (WH) {
 
 	WH.Timeline.prototype.getCurrentTick = function () {
 		return this.ticks[this.currentTick];
-	};
-
-	WH.Timeline.prototype.getNextTick = function () {
-		return this.ticks[this.currentTick + 1];
 	};
 
 	WH.Timeline.prototype.getDuration = function () {

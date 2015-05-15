@@ -1,9 +1,7 @@
 require('./base/workout-hero');
 
 window.start = function () {
-	function rnd (n) {
-		return Math.floor(Math.random() * n);
-	}
+	WH.init();
 
 	var beat = WH.Timeline.get('beat');
 	var beatString = 'p1000 '
