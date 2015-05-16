@@ -5,7 +5,7 @@
 var CFG = require('../base/config');
 
 module.exports = function (WH) {
-	function _proceedWithSequence (timeline, rep, cmd, offset) {
+	function __proceedWithExpr (timeline, rep, cmd, offset, predefined) {
 		var duration;
 		rep = +rep || 1;
 		offset = +offset;
@@ -25,60 +25,103 @@ module.exports = function (WH) {
 		});
 	}
 
+	// ------------- SAX-like CST -------------
 	/**
-	 * Parses string of following format: "/<formula><separator>{0,}/{1,}"
-	 * 		where:
-	 * 		<formula> is <repetitions><command><offset>
-	 * 		 		where:
-	 * 				<repetitions> is number
+	 * @private
+	 * @param {String} el
+	 * @param {RegExp|RegExp[]} expectations
+	 * @return {RegExp|Boolean}			false if didn't meet
+	 */
+	function __meetsExpectations (el, expectations) {
+		var meets = false;
+		expectations = (expectations.constructor === Array) ? expectations : [expectations];
+
+		(expectations.length).times(function (i) {
+			if (expectations[i].test(el)) {
+				meets = expectations[i];
+				return false;
+			}
+		});
+
+		return meets;
+	}
+
+	var SYNTAX = {
+		repetitions: /\d+/,
+		command: /[ptx]/i,
+		offset: /\d+/,
+		predefinedAt: /@/,
+		predefinedName: /[a-zA-Z_]+/
+	};
+
+	// ---------- end of SAX-like CST ---------
+	/**
+	 * Parses string of following format: "(<expression><separator>)+"
+	 * 		where
+	 * 		<expression> is (<repetitions>?)<command>(<offset>|<predefined>)
+	 * 		 		where
+	 * 				<repetitions> is Number; optional; 1 if omitted
 	 * 				<command> is /[ptx]/
-	 * 					"p" for pause,
-	 * 					"t" or "x" for regular beat tick
-	 * 				<offset> is number and means ms after the previous beat
-	 * 		<separator> is anything that does not match the <formula>
+	 * 					"p" for pause (do nothing),
+	 * 					"t" for regular beat tick,
+	 * 					"x" for proceeding with the predefined sequence
+	 * 				<offset> is Number and means ms after the previous beat. Expected after "p" or "t"
+	 * 				<predefined> is String starting with "@" and means the reference to the sequence defined formerly.
+	 * 					Expected after "x"
+	 * 		<separator> is anything that does not match the <expression>
 	 *
 	 * @param {String} str
 	 */
 	WH.Timeline.prototype.fromBeatString = function (str) {
-		var repetitions, command, offset, expectation;
+		var repetitions, command, offset, predefined, expectations, meet;
 
-		function _startNewFragment () {
+		function _startNewExpression () {
 			repetitions = '';
 			command = '';
 			offset = '';
-			expectation = /[ptx]|\d/;
+			predefined = '';
+			expectations = [SYNTAX.repetitions, SYNTAX.command];
 		}
 
-		_startNewFragment();
+		_startNewExpression();
 
 		for (var i = 0; i < str.length; i++) {
-			if (expectation.test(str[i])) {
-				if (/[ptx]/.test(str[i])) {
-
-					// Scenario: found a command right after another one without any separator
-					if (offset) {
-						_proceedWithSequence(this, repetitions, command, offset);
-						_startNewFragment();
-					}
-
-					command = (str[i] === 't' || str[i] === 'x') ? 'x' : 'p';
-					expectation = /\d/;
-				} else if (/\d/.test(str[i])) {
-					if (command) {
-						offset += str[i];
-					} else {
+			meet = __meetsExpectations(str[i], expectations);
+			if (meet) {
+				switch (meet) {
+					case SYNTAX.repetitions:
 						repetitions += str[i];
-					}
-					expectation = /[ptx]|\d/;
+						expectations = [SYNTAX.repetitions, SYNTAX.command];
+						break;
+					case SYNTAX.command:
+						// Scenario: found a command right after another one without any separator
+						if (offset || predefined) {
+							__proceedWithExpr(this, repetitions, command, offset, predefined);
+							_startNewExpression();
+						}
+
+						command = str[i];
+						expectations = (command === 'x' || command === 'X')
+							? SYNTAX.predefinedAt
+							: SYNTAX.offset;
+						break;
+					case SYNTAX.offset:
+						offset += str[i];
+						expectations = [SYNTAX.offset, SYNTAX.command];
+						break;
+					case SYNTAX.predefinedAt:
+						predefined += str[i];
+						expectations = SYNTAX.predefinedName;
+						break;
+					default : // do nothing
 				}
 			} else {
-				if (command && offset) {
-					_proceedWithSequence(this, repetitions, command, offset);
+				if (command && (offset || predefined)) {
+					__proceedWithExpr(this, repetitions, command, offset, predefined);
 				} // else - separator
-				_startNewFragment();
+				_startNewExpression();
 			}
 		}
-		_proceedWithSequence(this, repetitions, command, offset);
-
+		__proceedWithExpr(this, repetitions, command, offset, predefined);
 	}
 };

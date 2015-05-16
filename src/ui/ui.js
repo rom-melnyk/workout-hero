@@ -6,6 +6,7 @@ UI.init = function () {
 	UI.beatTicker = $('.current-tick');
 	UI.reminder = $('.reminder');
 	UI.beatTimeline = WH.Timeline.get(CFG.SYSTEM.beatCommonName);
+	UI.beatTickerAudio = $('#tick-audio')[0];
 
 	/**
 	 * A build-in handler for the beat timeline

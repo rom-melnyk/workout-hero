@@ -1,7 +1,8 @@
 module.exports = function (WH) {
 	/**
 	 * @callback Number~Callback
-	 * @param {Number} iterator
+	 * @param {Number} index
+	 * @return {*|Boolean}			if false - break the sequence
 	 */
 
 	/**
@@ -9,7 +10,9 @@ module.exports = function (WH) {
 	 * @param {Number~Callback} callback
 	 */
 	Number.prototype.times = function (callback) {
-		for (var i = 0; i < this; i++) callback(i);
+		for (var i = 0; i < this; i++) {
+			if (callback(i) === false) break;
+		}
 	};
 
 	Math.randomX = function (x) {
