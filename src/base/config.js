@@ -15,6 +15,7 @@ module.exports = {
 			 * 		2: show the round reminder
 			 */
 			showReminder: 1,
+			tickSound: '/assets/sound/tick-01.mp3',
 			pixelsPerSecond: 200
 		}
 	},

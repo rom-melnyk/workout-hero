@@ -10,6 +10,13 @@ html, body {
 	font: 18px sans-serif;
 }
 
+audio {
+	visibility: hidden;
+	position: absolute;
+	top: -1000px;
+	left: -1000px;
+}
+
 .header, .media-content, .footer {
 	position: absolute;
 	width: 100%;
