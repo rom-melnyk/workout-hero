@@ -2,59 +2,61 @@
  * A module for Browserify/Watchify.
  * Must be included after `WH.Timeline`.
  */
-var CFG = require('../base/config');
+var CFG = require('../base/config'),
+	Tick = require('./tick'),
+	Timeline = require('./timeline');
 
-module.exports = function (WH) {
-	function __proceedWithExpr (timeline, rep, cmd, offset, predefined) {
-		var duration;
-		rep = +rep || 1;
-		offset = +offset;
+function __proceedWithExpr (timeline, rep, cmd, offset, predefined) {
+	var duration;
+	rep = +rep || 1;
+	offset = +offset;
 
-		//console.log('> found: ' + rep + '/' + cmd + '/' + offset);
-		(rep).times(function () {
-			//if (cmd === 'p') {
-			//	if (timeline.ticks.length > 0) {
-			//		timeline.ticks[timeline.ticks.length - 1].offset += offset;
-			//		return true;
-			//	}
-			//}
-			duration = timeline.getDuration();
-			timeline.push(
-				new WH.Tick(duration + offset, cmd === 'p' ? '' : CFG.SYSTEM.beatCommonName)
-			);
-		});
-	}
+	//console.log('> found: ' + rep + '/' + cmd + '/' + offset);
+	(rep).times(function () {
+		//if (cmd === 'p') {
+		//	if (timeline.ticks.length > 0) {
+		//		timeline.ticks[timeline.ticks.length - 1].offset += offset;
+		//		return true;
+		//	}
+		//}
+		duration = timeline.getDuration();
+		timeline.push(
+			new Tick(duration + offset, cmd === 'p' ? '' : CFG.SYSTEM.beatCommonName)
+		);
+	});
+}
 
-	// ------------- SAX-like CST -------------
-	/**
-	 * @private
-	 * @param {String} el
-	 * @param {RegExp|RegExp[]} expectations
-	 * @return {RegExp|Boolean}			false if didn't meet
-	 */
-	function __meetsExpectations (el, expectations) {
-		var meets = false;
-		expectations = (expectations.constructor === Array) ? expectations : [expectations];
+// ------------- SAX-like CST -------------
+/**
+ * @private
+ * @param {String} el
+ * @param {RegExp|RegExp[]} expectations
+ * @return {RegExp|Boolean}			false if didn't meet
+ */
+function __meetsExpectations (el, expectations) {
+	var meets = false;
+	expectations = (expectations.constructor === Array) ? expectations : [expectations];
 
-		(expectations.length).times(function (i) {
-			if (expectations[i].test(el)) {
-				meets = expectations[i];
-				return false;
-			}
-		});
+	(expectations.length).times(function (i) {
+		if (expectations[i].test(el)) {
+			meets = expectations[i];
+			return false;
+		}
+	});
 
-		return meets;
-	}
+	return meets;
+}
 
-	var SYNTAX = {
-		repetitions: /\d+/,
-		command: /[ptx]/i,
-		offset: /\d+/,
-		predefinedAt: /@/,
-		predefinedName: /[a-zA-Z_]+/
-	};
+var SYNTAX = {
+	repetitions: /\d+/,
+	command: /[ptx]/i,
+	offset: /\d+/,
+	predefinedAt: /@/,
+	predefinedName: /[a-zA-Z_]+/
+};
+// ---------- end of SAX-like CST ---------
 
-	// ---------- end of SAX-like CST ---------
+module.exports = {
 	/**
 	 * Parses string of following format: "(<expression><separator>)+"
 	 * 		where
@@ -72,7 +74,7 @@ module.exports = function (WH) {
 	 *
 	 * @param {String} str
 	 */
-	WH.Timeline.prototype.fromBeatString = function (str) {
+	fromBeatString: function (str) {
 		var repetitions, command, offset, predefined, expectations, meet;
 
 		function _startNewExpression () {

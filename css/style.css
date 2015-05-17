@@ -54,3 +54,24 @@ audio {
 	/* width will be set dynamically */
 	background-color: #89e;
 }
+
+.beat-visualizer {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	line-height: 2em;
+	overflow-x: visible;
+	overflow-y: hidden;
+	white-space: nowrap;
+}
+.beat-visualizer .chunk {
+	display: inline-block;
+	height: 2px;
+	vertical-align: middle;
+	background-color: #4ce;
+}
+.beat-visualizer .chunk.beat {
+	height: 10px;
+	border-radius: 50%;
+	background-color: #1ce;
+}

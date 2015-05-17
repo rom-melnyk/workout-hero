@@ -3,41 +3,41 @@ var CFG = require('../base/config');
 var UI = {};
 
 UI.init = function () {
-	UI.beatTicker = $('.current-tick');
-	UI.reminder = $('.reminder');
-	UI.beatTimeline = WH.Timeline.get(CFG.SYSTEM.beatCommonName);
-	UI.beatTickerAudio = $('#tick-audio')[0];
+	UI.domElBeatTicker = $('.current-tick');
+	UI.domElReminder = $('.reminder');
+	UI.domElBeatTickerAudio = $('#tick-audio')[0];
 
-	/**
-	 * A build-in handler for the beat timeline
-	 */
-	WH.Handler.register(CFG.SYSTEM.beatCommonName, UI.animateCurrentBeatIndicator);
-
-	UI.beatTickerAudio.crossOrigin = true;
-	UI.beatTickerAudio.src = CFG.UI.footer.tickSound;
-	UI.beatTickerAudio.load();
-	UI.beatTickerAudio.oncanplay = function () {
+	UI.domElBeatTickerAudio.crossOrigin = true;
+	UI.domElBeatTickerAudio.src = CFG.UI.footer.tickSound;
+	UI.domElBeatTickerAudio.load();
+	UI.domElBeatTickerAudio.oncanplay = function () {
 		this.isReady = true;
 	};
+
+	UI.domElBeatVisualizer = $('.beat-visualizer')[0];
 };
 
-UI.animateCurrentBeatIndicator = function () {
-	UI.beatTicker.addClass('highlight');
-	if (UI.beatTickerAudio.isReady) {
-		UI.beatTickerAudio.play();
+UI.animateCurrentBeatIndicator = function (tick, timeline) {
+	if (!tick.handler) return;
+
+	UI.domElBeatTicker.addClass('highlight');
+	if (UI.domElBeatTickerAudio.isReady) {
+		UI.domElBeatTickerAudio.play();
 	}
 	setTimeout(function () {
-		UI.beatTicker.removeClass('highlight');
+		UI.domElBeatTicker.removeClass('highlight');
 	}, 50);
 };
 
 UI.updateReminder = function () {
+	var tl = WH.Timeline.get(CFG.SYSTEM.beatCommonName);
 	if (CFG.UI.footer.showReminder === 1) {
-		UI.reminder.width(
-			Math.round2(UI.beatTimeline.elapsed / UI.beatTimeline.getDuration() * 100)
+		UI.domElReminder.width(
+			Math.round2(tl.elapsed / tl.getDuration() * 100)
 			+ '%'
 		);
 	}
 };
+
 
 module.exports = UI;

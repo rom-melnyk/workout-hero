@@ -1,23 +1,34 @@
 var modUtils = require('../utils/utils'),
-	modHandler = require('../handler/handler'),
-	modTick = require('../timeline/tick'),
+	//modHandler = require('./handler'),
+	//modTick = require('../timeline/tick'),
 	modTimeline = require('../timeline/timeline'),
 	modTimer = require('../timer/timer'),
-	modParser = require('../timeline/parser'),
-	modUI = require('../ui/ui'),
+	//modParser = require('../timeline/parser'),
+	modBeatVisualizer = require('../timeline/beat-visualizer'),
+	UI = require('../ui/ui'),
 	CFG = require('./config');
 
 var WH = window.WH = {};
-modUtils(WH);
-modHandler(WH);
-modTick(WH);
-modTimeline(WH);
-modTimer(WH);
-modParser(WH);
+//modUtils(WH);
+//modHandler(WH);
+//modTick(WH);
+WH.Timeline = modTimeline;
+WH.Timer = modTimer;
+//modParser(WH);
+modBeatVisualizer(WH);
 
 WH.init = function () {
-	new WH.Timeline(CFG.SYSTEM.beatCommonName);
-	modUI.init();
+	var beat = new WH.Timeline(CFG.SYSTEM.beatCommonName);
+	beat.on('tick', UI.animateCurrentBeatIndicator);
+
+	WH.Timer.timelines.push(beat);
+	WH.Timer.on('update', UI.updateReminder);
+	WH.Timer.on('update', function () {
+		WH.beatVisualizer.move(40);
+	});
+	//WH.beatVisualizer.move(40);
+
+	UI.init();
 };
 
 module.exports = WH;

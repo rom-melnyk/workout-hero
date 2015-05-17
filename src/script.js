@@ -9,7 +9,7 @@ window.start = function () {
 
 	beat.fromBeatString(beatString);
 	console.log('Duration: ' + beat.getDuration() / 1000 + 's');
+	WH.beatVisualizer.add(10 * 1000);
 
-	WH.Timer.timelines.push(beat);
 	WH.Timer.start();
 };
